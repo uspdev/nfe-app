@@ -1,0 +1,7 @@
+# folder containing instalation specific data
+
+# ignore specific bower folder
+www/components
+
+# ignore ide settings
+.idea/
