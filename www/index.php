@@ -37,14 +37,39 @@ $ws_pwd = 'teste';
         </form>
 
         <div ng-view ng-show="res">
-            <div ng-show="res.chave">Chave: {{res.chave}}</div>
-
-            <div ng-repeat="(key,val) in res.status">
-                {{key}}: {{val}}
+            <br/>
+            <b>Retorno</b><br/>
+            
+            <div ng-show="res.chave">
+                Chave: <b>{{res.chave}}</b>
             </div>
-            <b>Links</b>
-            <div ng-repeat="(key,val) in res.url">
-                {{key}}: <a href="{{val}}">{{val}}</a>
+
+            <div ng-show="res.xml">
+                <br/>
+                <div><b>XML</b></div>
+                <div ng-repeat="(key,val) in res.xml">
+                    {{key}}: <b>{{val}}</b>
+                </div>
+            </div>
+
+            <div ng-show="res.prot">
+                <br/>
+                <b>Protocolo</b><br/>
+                Ambiente: <b>{{ res.prot.tpAmb }}</b> - <b>{{ ambiente[res.prot.tpAmb] }}</b> <br/>
+                Data da consulta: <b>{{ res.prot.dhConsulta }}</b> <br/>
+                Protocolo: <b>{{ res.prot.cStat }} - {{ res.prot.xMotivo }}</b> <br/>
+
+                <div ng-repeat="ev in res.prot.eventos">
+                    Evento: ({{ ev.dhEvento }}) {{ ev.tpEvento }} - {{ ev.descEvento }}
+                </div>
+            </div>
+
+            <div ng-show="res.url.length != 0">
+                <br/>
+                <b>Links</b>
+                <div ng-repeat="(key,val) in res.url">
+                    {{key}}: <a href="{{val}}">{{key}}</a>
+                </div>
             </div>
         </div>
     </div>
@@ -65,6 +90,10 @@ $ws_pwd = 'teste';
         $scope.ws_usr = '<?php echo $ws_usr ?>';
         $scope.ws_pwd = '<?php echo $ws_pwd ?>';
 
+        $scope.ambiente = [];
+        $scope.ambiente[1] = 'Produção';
+        $scope.ambiente[2] = 'Homologação (testes)';
+
 
         $scope.submit = function () {
             if (!($scope.xml != '' || $scope.chave != '')) {
@@ -76,7 +105,6 @@ $ws_pwd = 'teste';
                 data.chave = $scope.chave;
                 data.url = $scope.url;
 
-
                 $http({
                     method: 'POST',
                     url: $scope.url + '/xml',
@@ -87,7 +115,7 @@ $ws_pwd = 'teste';
                             'Authorization': 'Basic ' + btoa($scope.ws_usr + ':' + $scope.ws_pwd)
                         }
                 }).then(function onSuccess(data) {
-                    console.log(data);
+                    console.log(data.data);
                     $scope.res = data.data;
                     // this callback will be called asynchronously
                     // when the response is available
@@ -99,8 +127,6 @@ $ws_pwd = 'teste';
             }
         }
     });
-
-
 </script>
 
 </body>
