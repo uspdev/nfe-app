@@ -1,8 +1,10 @@
 <?php
 $uri = $_SERVER["REQUEST_URI"];
-$ws_url = 'http://dev.set.eesc.usp.br/uspdev/nfe-ws/api';
-$ws_usr = 'teste';
-$ws_pwd = 'teste';
+if (!is_file('../config.php')) {
+    die('COnfigure a aplicação antes de usar!');
+}
+include '../config.php';
+
 
 ?>
 <!DOCTYPE html>
@@ -39,7 +41,7 @@ $ws_pwd = 'teste';
         <div ng-view ng-show="res">
             <br/>
             <b>Retorno</b><br/>
-            
+
             <div ng-show="res.chave">
                 Chave: <b>{{res.chave}}</b>
             </div>

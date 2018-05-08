@@ -1,7 +1,9 @@
 # folder containing instalation specific data
 
+config.php
+
 # ignore specific bower folder
-www/components
+# www/components
 
 # ignore ide settings
 .idea/
