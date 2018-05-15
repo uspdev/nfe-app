@@ -57,12 +57,21 @@ include '../config.php';
             <div ng-show="res.prot">
                 <br/>
                 <b>Protocolo</b><br/>
-                Ambiente: <b>{{ res.prot.tpAmb }}</b> - <b>{{ ambiente[res.prot.tpAmb] }}</b> <br/>
-                Data da consulta: <b>{{ res.prot.dhConsulta }}</b> <br/>
-                Protocolo: <b>{{ res.prot.cStat }} - {{ res.prot.xMotivo }}</b> <br/>
+                <div ng-repeat="(key,val) in res.prot" ng-if="key != 'raw' && key != 'eventos' ">
+                    <span >{{key}}: <b>{{val}}</b></span>
+
+                </div>
 
                 <div ng-repeat="ev in res.prot.eventos">
                     Evento: ({{ ev.dhEvento }}) {{ ev.tpEvento }} - {{ ev.descEvento }}
+                </div>
+            </div>
+
+            <div ng-show="res.sefaz">
+                <br/>
+                <div><b>SEFAZ</b></div>
+                <div ng-repeat="(key,val) in res.sefaz">
+                    {{key}}: <b>{{val}}</b>
                 </div>
             </div>
 
@@ -73,6 +82,7 @@ include '../config.php';
                     {{key}}: <a href="{{val}}">{{key}}</a>
                 </div>
             </div>
+
         </div>
     </div>
 </div>
