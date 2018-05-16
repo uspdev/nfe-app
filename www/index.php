@@ -18,6 +18,9 @@ include '../config.php';
     <link href="lib/bootstrap/bootstrap.css" rel="stylesheet">
     <link href="lib/font-awesome/css/font-awesome.min.css" rel="stylesheet">
     <style>
+        .red {
+            color: red;
+        }
     </style>
 </head>
 <body ng-app="myApp">
@@ -50,7 +53,7 @@ include '../config.php';
                 <br/>
                 <div><b>XML</b></div>
                 <div ng-repeat="(key,val) in res.xml">
-                    {{key}}: <b>{{val}}</b>
+                    {{key}}: <span ng-class="{'red':erro(val)}"><b>{{val}}</b></span>
                 </div>
             </div>
 
@@ -58,8 +61,7 @@ include '../config.php';
                 <br/>
                 <b>Protocolo</b><br/>
                 <div ng-repeat="(key,val) in res.prot" ng-if="key != 'raw' && key != 'eventos' ">
-                    <span >{{key}}: <b>{{val}}</b></span>
-
+                    <span>{{key}}: <span ng-class="{'red':erro(val)}"><b>{{val}}</b></span>
                 </div>
 
                 <div ng-repeat="ev in res.prot.eventos">
@@ -71,7 +73,7 @@ include '../config.php';
                 <br/>
                 <div><b>SEFAZ</b></div>
                 <div ng-repeat="(key,val) in res.sefaz">
-                    {{key}}: <b>{{val}}</b>
+                    {{key}}: <span ng-class="{'red':erro(val)}"><b>{{val}}</b></span>
                 </div>
             </div>
 
@@ -105,6 +107,18 @@ include '../config.php';
         $scope.ambiente = [];
         $scope.ambiente[1] = 'Produção';
         $scope.ambiente[2] = 'Homologação (testes)';
+
+        $scope.erro = function (str) {
+            if (typeof str == 'string') {
+                console.log(str.substr(0, 4));
+                if (str.substr(0, 4) == 'Erro') {
+                    return 'red';
+                    console.log('entrou');
+                }
+            }
+
+
+        };
 
 
         $scope.submit = function () {
