@@ -138,7 +138,7 @@ include '../config.php';
             else {
                 var data = {};
                 data.xml = $scope.xml;
-                data.chave = $scope.chave;
+                //data.chave = $scope.chave;
                 data.url = $scope.url;
 
                 $http({
