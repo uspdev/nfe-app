@@ -1,20 +1,33 @@
 # nfe-app
-App demo/teste para consumir o nfe-ws (https://github.com/uspdev/nfe-ws)
+App demo/teste para consumir o [nfe-ws](https://github.com/uspdev/nfe-ws) utilizando a biblioteca [nfe-ws-consumer](https://github.com/uspdev/nfe-ws-consumer).
 
-O APP é uma aplicação em angularjs e utiliza boostrap.
+A aplicação é desenvolvida em PHP e utiliza Bootstrap para a interface.
 
 ### Instalação
 
-Os componentes do bower estão comitados assim não há necessidade de bower no servidor.
+Instale as dependências via Composer:
 
-Copie o arquivo config.sample.php para config.php e ajuste conforme necessário.
+```bash
+composer install
+```
 
+Copie o arquivo `config.sample.php` para `config.php` e ajuste conforme necessário:
+
+```php
+$ws_url = 'http://servidor/nfe-ws/api';
+$ws_api_key = 'sua-api-key-gerada';
+```
 
 ### Utilização
 
-Coloque esse projeto no servidor e aponte o apache para a pasta www.
+Aponte o servidor web (Apache, Nginx ou servidor embutido do PHP) para a pasta `www/`.
 
+Exemplo com o servidor embutido do PHP para testes:
 
-### Pessoas envolvidas ###
+```bash
+php -S localhost:8000 -t www/
+```
+
+### Pessoas envolvidas
 
 Masaki Kawabata Neto - kawabata em sc.usp.br

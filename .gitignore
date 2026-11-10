@@ -2,8 +2,9 @@
 
 config.php
 
-# ignore specific bower folder
-# www/components
+# composer vendor
+/vendor/
 
 # ignore ide settings
 .idea/
+

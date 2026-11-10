@@ -1,18 +1,61 @@
 <?php
-$uri = $_SERVER["REQUEST_URI"];
-if (!is_file('../config.php')) {
-    die('COnfigure a aplicação antes de usar!');
+require_once __DIR__ . '/../bootstrap.php';
+
+$uri = $_SERVER["REQUEST_URI"] ?? '/';
+
+use Uspdev\Nfe\NfeWsConsumer;
+
+$url = isset($_POST['url']) && trim($_POST['url']) !== '' ? trim($_POST['url']) : ($ws_url ?? '');
+$apiKey = $ws_api_key ?? '';
+$xml = $_POST['xml'] ?? '';
+$chave = $_POST['chave'] ?? '';
+$action = $_POST['action'] ?? '';
+
+$sslVerify = isset($ws_ssl_verify) ? (bool)$ws_ssl_verify : false;
+$statusRes = null;
+$res = null;
+$erroGeral = null;
+
+function hasErro($val) {
+    return is_string($val) && strncmp($val, 'Erro', 4) === 0;
 }
-include '../config.php';
 
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (!class_exists('Uspdev\Nfe\NfeWsConsumer')) {
+        $erroGeral = 'A biblioteca Uspdev\Nfe\NfeWsConsumer não foi encontrada. Execute "composer install".';
+    } else {
+        $consumer = new NfeWsConsumer($url, $apiKey, 0, $sslVerify);
 
+        if ($action === 'status') {
+            $statusRes = $consumer->status();
+            if ($statusRes === false || empty($statusRes)) {
+                $err = error_get_last();
+                $detalhe = !empty($err['message']) ? ': ' . htmlspecialchars($err['message']) : '';
+                $statusRes = '<span class="red">Erro ao consultar status do webservice' . $detalhe . '</span>';
+            }
+        } elseif ($action === 'enviar') {
+            if (empty(trim($xml)) && empty(trim($chave))) {
+                $erroGeral = 'Informe o XML ou a chave de 44 dígitos da NF-e.';
+            } else {
+                $ret = !empty(trim($chave)) && empty(trim($xml))
+                    ? $consumer->consultaChave(trim($chave))
+                    : $consumer->consultaXML($xml);
+                if (is_array($ret)) {
+                    $res = $ret;
+                } else {
+                    $erroGeral = 'Resposta inválida do webservice: ' . htmlspecialchars((string)$ret);
+                }
+            }
+        }
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <title>NFE</title>
     <meta charset="utf-8">
-    <base href="<?php echo $uri ?>"/>
+    <base href="<?php echo htmlspecialchars($uri) ?>"/>
 
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="lib/bootstrap/bootstrap.css" rel="stylesheet">
@@ -23,147 +66,127 @@ include '../config.php';
         }
     </style>
 </head>
-<body ng-app="myApp">
-<div ng-controller="main">
-
+<body>
     <div class="container-fluid">
         <div class="row">
             <div class="col-md-12">
+                <h2>Consulta NFe</h2>
 
+                <?php if (!empty($erroGeral)): ?>
+                    <div class="alert alert-danger">
+                        <?= $erroGeral ?>
+                    </div>
+                <?php endif; ?>
 
-                <form name="Form" ng-submit="submit()">
-
+                <form method="POST" action="">
                     <p>Webservice</p>
-                    <input type="text" ng-model="url" size="50" name="url"/><br><br>
+                    <input type="text" name="url" size="50" value="<?= htmlspecialchars($url) ?>" />
+                    <button type="submit" name="action" value="status" class="btn btn-default btn-sm">
+                        <i class="fa fa-refresh"></i> Consultar Status
+                    </button>
+
+                    <?php if ($statusRes !== null): ?>
+                        <div style="margin-top: 10px;" class="well well-sm">
+                            <?php if (is_array($statusRes)): ?>
+                                <div><strong><?= htmlspecialchars($statusRes['cnpj'] ?? '') ?></strong> - <?= htmlspecialchars($statusRes['empresa'] ?? '') ?></div>
+                                <div>Validade: <?= htmlspecialchars($statusRes['validade'] ?? '') ?></div>
+                                <div class="<?= ($statusRes['expirado'] ?? false) ? 'red' : 'green' ?>">
+                                    <?= htmlspecialchars($statusRes['mensagem'] ?? '') ?>
+                                </div>
+                            <?php else: ?>
+                                <div><?= $statusRes ?></div>
+                            <?php endif; ?>
+                        </div>
+                    <?php endif; ?>
+
+                    <br><br>
 
                     <p>Cole o xml aqui</p>
-                    <textarea name="xml" ng-model="xml" rows="6" cols="100"></textarea>
+                    <textarea name="xml" rows="6" cols="100"><?= htmlspecialchars($xml) ?></textarea>
 
                     <p>Ou a chave (somente numeros - 44 digitos)</p>
-                    <input type="text" ng-model="chave" size="50" name="chave"/>
+                    <input type="text" name="chave" size="50" value="<?= htmlspecialchars($chave) ?>" />
                     <br/><br/>
-                    <input type="submit" value="Enviar">
+                    <button type="submit" name="action" value="enviar" class="btn btn-primary">Enviar</button>
                 </form>
             </div>
         </div>
-        <div class="row">
-            <div class="col-md-6">
 
-                <div ng-view ng-show="res">
-                    <br/>
-                    <b>Retorno</b><br/>
-
-                    <div ng-show="res.chave">
-                        Chave: <b>{{res.chave}}</b>
-                    </div>
-
-                    <div ng-show="res.xml">
+        <?php if (!empty($res)): ?>
+            <div class="row" style="margin-top: 20px;">
+                <div class="col-md-6">
+                    <div>
                         <br/>
-                        <div><b>XML</b></div>
-                        <div ng-repeat="(key,val) in res.xml">
-                            {{key}}: <span ng-class="{'red':erro(val)}"><b>{{val}}</b></span>
-                        </div>
-                    </div>
+                        <b>Retorno</b><br/>
 
-                    <div ng-show="res.prot">
+                        <?php if (!empty($res['chave'])): ?>
+                            <div>
+                                Chave: <b><?= htmlspecialchars($res['chave']) ?></b>
+                            </div>
+                        <?php endif; ?>
+
+                        <?php if (!empty($res['xml']) && is_array($res['xml'])): ?>
+                            <br/>
+                            <div><b>XML</b></div>
+                            <?php foreach ($res['xml'] as $key => $val): ?>
+                                <div>
+                                    <?= htmlspecialchars($key) ?>:
+                                    <span class="<?= hasErro($val) ? 'red' : '' ?>"><b><?= htmlspecialchars(is_array($val) ? json_encode($val) : (string)$val) ?></b></span>
+                                </div>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+
+                        <?php if (!empty($res['prot']) && is_array($res['prot'])): ?>
+                            <br/>
+                            <b>Protocolo</b><br/>
+                            <?php foreach ($res['prot'] as $key => $val): ?>
+                                <?php if ($key !== 'raw' && $key !== 'eventos'): ?>
+                                    <div>
+                                        <?= htmlspecialchars($key) ?>:
+                                        <span class="<?= hasErro($val) ? 'red' : '' ?>"><b><?= htmlspecialchars(is_array($val) ? json_encode($val) : (string)$val) ?></b></span>
+                                    </div>
+                                <?php endif; ?>
+                            <?php endforeach; ?>
+
+                            <?php if (!empty($res['prot']['eventos']) && is_array($res['prot']['eventos'])): ?>
+                                <?php foreach ($res['prot']['eventos'] as $ev): ?>
+                                    <div>
+                                        Evento: (<?= htmlspecialchars($ev['dhEvento'] ?? '') ?>) <?= htmlspecialchars($ev['tpEvento'] ?? '') ?> - <?= htmlspecialchars($ev['descEvento'] ?? '') ?>
+                                    </div>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        <?php endif; ?>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <?php if (!empty($res['sefaz']) && is_array($res['sefaz'])): ?>
                         <br/>
-                        <b>Protocolo</b><br/>
-                        <div ng-repeat="(key,val) in res.prot" ng-if="key != 'raw' && key != 'eventos' ">
-                    <span>{{key}}: <span ng-class="{'red':erro(val)}"><b>{{val}}</b></span>
-                        </div>
+                        <div><b>SEFAZ</b></div>
+                        <?php foreach ($res['sefaz'] as $key => $val): ?>
+                            <div>
+                                <?= htmlspecialchars($key) ?>:
+                                <span class="<?= hasErro($val) ? 'red' : '' ?>"><b><?= htmlspecialchars(is_array($val) ? json_encode($val) : (string)$val) ?></b></span>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
 
-                        <div ng-repeat="ev in res.prot.eventos">
-                            Evento: ({{ ev.dhEvento }}) {{ ev.tpEvento }} - {{ ev.descEvento }}
-                        </div>
-                    </div>
+                    <?php if (!empty($res['url']) && is_array($res['url'])): ?>
+                        <br/>
+                        <div><b>Links</b></div>
+                        <?php foreach ($res['url'] as $key => $val): ?>
+                            <?php $linkHref = is_file(__DIR__ . '/download.php') ? 'download.php?url=' . urlencode($val) : $val; ?>
+                            <div>
+                                <?= htmlspecialchars($key) ?>: <a href="<?= htmlspecialchars($linkHref) ?>" target="_blank"><?= htmlspecialchars($key) ?></a>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
                 </div>
             </div>
-            <div class="col-md-6">
-
-                <div ng-show="res.sefaz">
-                    <br/>
-                    <div><b>SEFAZ</b></div>
-                    <div ng-repeat="(key,val) in res.sefaz">
-                        {{key}}: <span ng-class="{'red':erro(val)}"><b>{{val}}</b></span>
-                    </div>
-                </div>
-
-                <div ng-show="res.url">
-                    <br/>
-                    <div><b>Links</b></div>
-                    <div ng-repeat="(key,val) in res.url">
-                        {{key}}: <a href="{{val}}">{{key}}</a>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <?php endif; ?>
     </div>
-</div>
 
-
-<script src="lib/jquery-2.1.1.min.js"></script>
-<script src="components/angular/angular.js"></script>
-
-<script type="text/javascript">
-    angular.module('myApp', []);
-    var app = angular.module('myApp');
-
-    app.controller('main', function ($scope, $http) {
-        // do something
-        $scope.xml = '';
-        $scope.chave = '';
-        $scope.url = '<?php echo $ws_url ?>';
-        $scope.ws_usr = '<?php echo $ws_usr ?>';
-        $scope.ws_pwd = '<?php echo $ws_pwd ?>';
-
-        $scope.ambiente = [];
-        $scope.ambiente[1] = 'Produção';
-        $scope.ambiente[2] = 'Homologação (testes)';
-
-        $scope.erro = function (str) {
-            if (typeof str == 'string') {
-                console.log(str.substr(0, 4));
-                if (str.substr(0, 4) == 'Erro') {
-                    return 'red';
-                    console.log('entrou');
-                }
-            }
-        };
-
-
-        $scope.submit = function () {
-            if (!($scope.xml != '' || $scope.chave != '')) {
-                alert('Campo xml e chave não podem ser vazios.');
-            }
-            else {
-                var data = {};
-                data.xml = $scope.xml;
-                //data.chave = $scope.chave;
-                data.url = $scope.url;
-
-                $http({
-                    method: 'POST',
-                    url: $scope.url + '/xml',
-                    data: $.param(data),
-                    headers:
-                        {
-                            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-                            'Authorization': 'Basic ' + btoa($scope.ws_usr + ':' + $scope.ws_pwd)
-                        }
-                }).then(function onSuccess(data) {
-                    console.log(data.data);
-                    $scope.res = data.data;
-                    // this callback will be called asynchronously
-                    // when the response is available
-                }, function onError(data, status, headers, config) {
-                    console.log(status);
-                    // called asynchronously if an error occurs
-                    // or server returns response with an error status.
-                });
-            }
-        }
-    });
-</script>
-
+    <script src="lib/jquery-2.1.1.min.js"></script>
+    <script src="lib/bootstrap.min.js"></script>
 </body>
 </html>

@@ -1,0 +1,55 @@
+{
+    "_readme": [
+        "This file locks the dependencies of your project to a known state",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
+        "This file is @generated automatically"
+    ],
+    "content-hash": "2b9ce934220a7959f2c91b25a22313b5",
+    "packages": [
+        {
+            "name": "uspdev/nfe-ws-consumer",
+            "version": "dev-master",
+            "dist": {
+                "type": "path",
+                "url": "../nfe-ws-consumer",
+                "reference": "dbd25ba8005e7ceb8430a6aeda7b20ca9880df81"
+            },
+            "require": {
+                "ext-curl": "*",
+                "php": ">=7.0.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Uspdev\\Nfe\\": "src/"
+                }
+            },
+            "license": [
+                "GPL-2.0-or-later"
+            ],
+            "authors": [
+                {
+                    "name": "Masaki Kawabata Net",
+                    "email": "kawabata@usp.br"
+                }
+            ],
+            "description": "API para consumir dados de uspdev/nfe-ws",
+            "transport-options": {
+                "relative": true
+            }
+        }
+    ],
+    "packages-dev": [],
+    "aliases": [],
+    "minimum-stability": "dev",
+    "stability-flags": {
+        "uspdev/nfe-ws-consumer": 20
+    },
+    "prefer-stable": true,
+    "prefer-lowest": false,
+    "platform": {
+        "php": ">=7.0.0"
+    },
+    "platform-dev": {},
+    "plugin-api-version": "2.6.0"
+}
