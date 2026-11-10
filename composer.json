@@ -9,18 +9,9 @@
             "email": "kawabata@usp.br"
         }
     ],
-    "repositories": [
-        {
-            "type": "path",
-            "url": "../nfe-ws-consumer"
-        },
-        {
-            "packagist.org": false
-        }
-    ],
     "require": {
         "php": ">=7.0.0",
-        "uspdev/nfe-ws-consumer": "dev-master"
+        "uspdev/nfe-ws-consumer": "^0.3"
     },
     "minimum-stability": "dev",
     "prefer-stable": true

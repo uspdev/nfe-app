@@ -4,15 +4,21 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "2b9ce934220a7959f2c91b25a22313b5",
+    "content-hash": "9724288fb975ff706282e37634bb1c0b",
     "packages": [
         {
             "name": "uspdev/nfe-ws-consumer",
-            "version": "dev-master",
+            "version": "0.3.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/uspdev/nfe-ws-consumer.git",
+                "reference": "1932cd341f2c262213d246f9ce40b45f6a2432d5"
+            },
             "dist": {
-                "type": "path",
-                "url": "../nfe-ws-consumer",
-                "reference": "dbd25ba8005e7ceb8430a6aeda7b20ca9880df81"
+                "type": "zip",
+                "url": "https://api.github.com/repos/uspdev/nfe-ws-consumer/zipball/1932cd341f2c262213d246f9ce40b45f6a2432d5",
+                "reference": "1932cd341f2c262213d246f9ce40b45f6a2432d5",
+                "shasum": ""
             },
             "require": {
                 "ext-curl": "*",
@@ -24,6 +30,7 @@
                     "Uspdev\\Nfe\\": "src/"
                 }
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "GPL-2.0-or-later"
             ],
@@ -34,17 +41,17 @@
                 }
             ],
             "description": "API para consumir dados de uspdev/nfe-ws",
-            "transport-options": {
-                "relative": true
-            }
+            "support": {
+                "issues": "https://github.com/uspdev/nfe-ws-consumer/issues",
+                "source": "https://github.com/uspdev/nfe-ws-consumer/tree/0.3.0"
+            },
+            "time": "2026-11-10T15:03:37+00:00"
         }
     ],
     "packages-dev": [],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": {
-        "uspdev/nfe-ws-consumer": 20
-    },
+    "stability-flags": {},
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
