@@ -96,7 +96,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <div class="row">
                                     <div class="col-md-6">
                                         <div><strong>Certificado Digital</strong></div>
-                                        <?php if (isset($statusRes['erro'])): ?>
+                                        <?php if (($statusRes['autenticado'] ?? true) === false): ?>
+                                            <div class="text-muted"><?= htmlspecialchars($statusRes['mensagem'] ?? 'Autentique-se com API Key para visualizar os dados do certificado.') ?></div>
+                                        <?php elseif (isset($statusRes['erro'])): ?>
                                             <div class="red">Erro: <?= htmlspecialchars($statusRes['erro']) ?></div>
                                         <?php else: ?>
                                             <div><strong><?= htmlspecialchars($statusRes['cnpj'] ?? '') ?></strong> - <?= htmlspecialchars($statusRes['empresa'] ?? '') ?></div>
