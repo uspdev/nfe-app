@@ -88,10 +88,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <?php if ($statusRes !== null): ?>
                         <div style="margin-top: 10px;" class="well well-sm">
                             <?php if (is_array($statusRes)): ?>
-                                <div><strong><?= htmlspecialchars($statusRes['cnpj'] ?? '') ?></strong> - <?= htmlspecialchars($statusRes['empresa'] ?? '') ?></div>
-                                <div>Validade: <?= htmlspecialchars($statusRes['validade'] ?? '') ?></div>
-                                <div class="<?= ($statusRes['expirado'] ?? false) ? 'red' : 'green' ?>">
-                                    <?= htmlspecialchars($statusRes['mensagem'] ?? '') ?>
+                                <?php
+                                $desatualizado = !empty($statusRes['modo_compatibilidade'])
+                                    || (!empty($statusRes['versao_em_uso']) && !empty($statusRes['versao_corrente']) && $statusRes['versao_em_uso'] !== $statusRes['versao_corrente']);
+                                $suggestedUrl = preg_replace('#/v\d+$#', '', rtrim($url, '/')) . '/' . ($statusRes['versao_corrente'] ?? 'v1');
+                                ?>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div><strong>Certificado Digital</strong></div>
+                                        <?php if (isset($statusRes['erro'])): ?>
+                                            <div class="red">Erro: <?= htmlspecialchars($statusRes['erro']) ?></div>
+                                        <?php else: ?>
+                                            <div><strong><?= htmlspecialchars($statusRes['cnpj'] ?? '') ?></strong> - <?= htmlspecialchars($statusRes['empresa'] ?? '') ?></div>
+                                            <div>Validade: <?= htmlspecialchars($statusRes['validade'] ?? '') ?></div>
+                                            <div class="<?= ($statusRes['expirado'] ?? false) ? 'red' : 'green' ?>">
+                                                <?= htmlspecialchars($statusRes['mensagem'] ?? '') ?>
+                                            </div>
+                                        <?php endif; ?>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div><strong>Informações da API</strong></div>
+                                        <div>Versão em uso: <strong><?= htmlspecialchars($statusRes['versao_em_uso'] ?? '-') ?></strong></div>
+                                        <div>Versão mais recente: <strong><?= htmlspecialchars($statusRes['versao_corrente'] ?? '-') ?></strong></div>
+                                        <?php if ($desatualizado): ?>
+                                            <div class="alert alert-warning" style="margin-top: 8px; margin-bottom: 0;">
+                                                <strong>Atenção:</strong> Configure a URL do servidor (<code>$srv</code>) para usar a versão mais recente:
+                                                <code><?= htmlspecialchars($suggestedUrl) ?></code>
+                                            </div>
+                                        <?php endif; ?>
+                                    </div>
                                 </div>
                             <?php else: ?>
                                 <div><?= $statusRes ?></div>
